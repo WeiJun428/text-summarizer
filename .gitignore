@@ -1,0 +1,8 @@
+# python venv
+t/
+
+# datasets
+data/
+
+# model checkpoint
+*.pt
