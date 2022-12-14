@@ -26,9 +26,13 @@ In this project, I implemented and trained a basic encoder-decoder model, with s
 
 Take a peek at an example of the dataset:
 
-Article: Saurav Kant, an alumnus of upGrad and IIIT-B's PG Program in Machine learning and Artificial Intelligence, was a Sr Systems Engineer at Infosys with almost 5 years of work experience. The program and upGrad's 360-degree career support helped him transition to a Data Scientist at Tech Mahindra with 90% salary hike. upGrad's Online Power Learning has powered 3 lakh+ careers.
+Article:
 
-Headline: upGrad learner switches to career in ML & Al with 90% salary hike
+> Saurav Kant, an alumnus of upGrad and IIIT-B's PG Program in Machine learning and Artificial Intelligence, was a Sr Systems Engineer at Infosys with almost 5 years of work experience. The program and upGrad's 360-degree career support helped him transition to a Data Scientist at Tech Mahindra with 90% salary hike. upGrad's Online Power Learning has powered 3 lakh+ careers.
+
+Headline:
+
+> upGrad learner switches to career in ML & Al with 90% salary hike
 
 ## Methodology
 
@@ -38,14 +42,19 @@ First, in order to improve my understanding on text summarization, I started wit
 
 For example:
 
-Input paragraphs:
-In an attempt to build an AI-ready workforce, Microsoft announced Intelligent Cloud Hub which has been launched to empower the next generation of students with AI-ready skills. Envisioned as a three-year collaborative program, Intelligent Cloud Hub will support around 100 institutions with AI infrastructure, course content and curriculum, developer support, development tools and give students access to cloud and AI services. As part of the program, the Redmond giant which wants to expand its reach and is planning to build a strong developer ecosystem in India with the program will set up the core AI infrastructure and IoT Hub for the selected campuses. The company will provide AI development tools and Azure AI services such as Microsoft Cognitive Services, Bot Services and Azure Machine Learning.According to Manish Prakash, Country General Manager-PS, Health and Education, Microsoft India, said, "With AI being the defining technology of our time, it is transforming lives and industry and the jobs of tomorrow will require a different skillset. This will require more collaborations and training and working with AI. That’s why it has become more critical than ever for educational institutions to integrate new cloud and AI technologies. The program is an attempt to ramp up the institutional set-up and build capabilities among the educators to educate the workforce of tomorrow." The program aims to build up the cognitive skills and in-depth understanding of developing intelligent cloud connected solutions for applications across industry. Earlier in April this year, the company announced Microsoft Professional Program In AI as a learning track open to the public. The program was developed to provide job ready skills to programmers who wanted to hone their skills in AI and data science with a series of online courses which featured hands-on labs and expert instructors as well. This program also included developer-focused AI school that provided a bunch of assets to help build AI skills.
+Input paragraphs (2016 characters):
 
-Output:
+> In an attempt to build an AI-ready workforce, Microsoft announced Intelligent Cloud Hub which has been launched to empower the next generation of students with AI-ready skills...
 
-Envisioned as a three-year collaborative program, Intelligent Cloud Hub will support around 100 institutions with AI infrastructure, course content and curriculum, developer support, development tools and give students access to cloud and AI services. The company will provide AI development tools and Azure AI services such as Microsoft Cognitive Services, Bot Services and Azure Machine Learning. According to Manish Prakash, Country General Manager-PS, Health and Education, Microsoft India, said, "With AI being the defining technology of our time, it is transforming lives and industry and the jobs of tomorrow will require a different skillset
+Output (650 characters):
 
-However, the limitation of extractive summarization makes it hard to condense an article into a short news headline. It is more useful to create a shorter paragraph that summarize a long article.
+> Envisioned as a three-year collaborative program, Intelligent Cloud Hub will support around 100 institutions with AI infrastructure, course content and curriculum, developer support, development tools and give students access to cloud and AI services. The company will provide AI development tools and Azure AI services such as Microsoft Cognitive Services, Bot Services and Azure Machine Learning. According to Manish Prakash, Country General Manager-PS, Health and Education, Microsoft India, said, "With AI being the defining technology of our time, it is transforming lives and industry and the jobs of tomorrow will require a different skillset.
+
+However, the limitation of extractive summarization makes it hard to condense an article into a short news headline.  Also, since it is an unsupervised learning algorithm, meaning that it does not use any labeled data or external knowledge to generate summaries. Instead, it relies on the structure of the text itself to identify important sentences and then produces a summary based on these sentences.
+
+One of the main limitations of TextRank is that it does not take into account the overall context or meaning of the text when generating summaries. This can lead to summaries that are incomplete or inaccurate, and do not accurately represent the original content. Additionally, TextRank is not able to incorporate any additional information or background knowledge that may be relevant to the text, which can further limit its ability to produce high-quality summaries.
+
+It is more useful to create a shorter paragraph that summarize a long article.
 
 Hence, I start to build an encoder-decoder model in Pytorch.
 
@@ -69,22 +78,69 @@ First, I use the following techniques to preprocess the data
 
 Initially, I tried to implement the Dataset and Dataloader class but I couldnt't fix a diemnsionality error that keeps bugging me. Hence, I keep the data in memory as a list instead. This indeed makes the training and batch organization a bit harder, but I managed to translate them accordingly.
 
-#### Model
+#### Final Model
 
-This model involves two parts: RNNEncoder and Attention-based RNNDecoder. The use of embeddings and gru are pretty standard. Other notable model parts involve the use of `F.softmax` after `nn.Linear`, `F.relu` as major activation function, and `dropout = 0.1` to avoid overfitting. More details can be read from the Jupyter notebook in the repository.
+This model involves two parts: RNNEncoder and Attention-based RNNDecoder.
 
-One technique that I use is teacher forcing. When teaching forcing is applied, the model is given access to the ground-truth input sequence at each time step, and is expected to use this information to generate the next word in the sequence. This can help the model to stay on track and generate outputs that more closely match the ground-truth input. The teaching forcing ratio is a hyperparameter that determines the extent to which the model should rely on the ground-truth input sequence when generating the next word in the sequence. I use a ratio of 0.5, which I believe seems to provide decreased loss after training on 60 epochs.
+```
+EncoderRNN(
+  (embedding): Embedding(100293, 300)
+  (gru): GRU(300, 300)
+)
 
-I choose a batch size of 256 and train the model at learning rate = 0.02 for 120 epochs, 0.01 for 840 epochs, and 0.005 for 360 epochs. Totally, I train the model for 1320 epochs (more than 15 hours on Colab with 3 alternating accounts), where the model stops to progress and perform better after training.
+AttnDecoderRNN(
+  (embedding): Embedding(41363, 300)
+  (attn): Linear(in_features=600, out_features=90, bias=True)
+  (attn_combine): Linear(in_features=600, out_features=300, bias=True)
+  (dropout): Dropout(p=0.1, inplace=False)
+  (gru): GRU(300, 300)
+  (out): Linear(in_features=300, out_features=41363, bias=True)
+)
+```
 
-I do not add any momentum and weight decay as my experiment shows that it only makes the model worse for the first 60 epochs. This might need more further investigation as I believe the momentum should only stabilize the model when the learning rate is lower.
+**Gated Recurrent Unit (GRU)**
 
-## Evaluation
+According to my research, most of the related work prefer using LSTM/Bi-LSTM in text summarizer. However, my LSTM code does have some dimensionality error that took me two days of debugging, and with no good result. Hence, I decide to stick with just basic GRU first.
 
-TODO
+**Other**
+
+The use of `F.softmax`, `nn.Linear`, `F.relu`, and `dropout = 0.1` are pretty standard.
+
+#### Experiments and Hyperparamters
+
+Most of my experiment is conducted by training the model for 60 epochs, which took about 30 minutes each. If there is a tie (final loss is similar), I will stick with the one that follows the industrial standard or reduces the training time.
+
+**Hidden Size**
+
+I experiment with hidden size = 300, 600, and 900. I choose 300 as the other two options took much longer time to train for just a single epoch. Also, 600 and 900 seems to have greater loss after 60 epochs. (about 0.3 higher than 300) These bigger model, despite having greater potential, will need much longer time to become better and it is not realistic to train a good model within a few days using only Colab free GPU.
+
+**Teaching Forcing**
+
+The teaching forcing ratio is a hyperparameter that determines the extent to which the model should rely on the ground-truth input sequence when generating the next word in the sequence. When teaching forcing is applied, the model is given access to the ground-truth input sequence at each time step, and is expected to use this information to generate the next word in the sequence. This can help the model to stay on track and generate outputs that more closely match the ground-truth input.  I use a ratio of 0.5, which decreased the loss. Ratio lower than 0.3 seems to make the model diverge from learning.
+
+**Momentum and Weight Decay**
+
+I do not add any momentum and weight decay as my experiment shows that it only makes the model worse, despite with a lower learning rate than I chose. This might need more further investigation  in the future as I believe the momentum should only stabilize the model when the learning rate is lower.
+
+**Batch Size and Learning Rate**
+
+I choose a batch size of 256 and train the model at learning rate = 0.02 for 120 epochs, 0.01 for 840 epochs, and 0.005 for 360 epochs. Totally, I train the model for 1320 epochs (more than 15 hours on Colab across 4 days), where the model stops to progress and perform better after training.
 
 ## Results
 
-The final model still performs pretty bad
+This is the plot of the loss function across 1320 epochs.
+![Plots of loss function](loss.png)
 
 ## Conclusion
+
+This model is way too basic to be a good summarizer. There are a couple of different approaches that I might want to try in the future, given that I have better GPU resources and time.
+
+1. Using a larger training dataset: A larger training dataset can provide the model with more examples to learn from, which can improve its accuracy. I have found a couple of larger datasets that might be handy for this approach, but might require a more stable GPU to train them instead of just using the Colab free GPU.
+
+2. Fine-tuning the model's hyperparameters: The size of the hidden layers, can have a significant impact on its accuracy. I might want to increase the size of hidden layers so that the model has a better power to learn the texts better.
+
+3. Use LSTM or other transformer architecture: They are more related to the recent work in text summarizer. I try to implement LSTM at first but to not avail. If I have more time, I will definitely give it a try and I believe it will yield a better model within shorter training time.
+
+4. Ensembling multiple models: Combining the predictions of multiple models can improve the overall accuracy of the system. This can be done by training multiple models independently and then averaging their predictions, or by training a single model to combine the predictions of multiple sub-models.
+
+5. Training the model for longer: Once I increase the size.complexity of model, the amount of time the model spends training can improve its accuracy by giving it more opportunities to learn from the data. In addition, I observe that even though the model stops to get a lower loss during training, training the model for longer duration does increase the likelihood of model to generate a better summary with random inputs.
