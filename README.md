@@ -1,5 +1,7 @@
 # CSE 490G1 Final Project: Text Summarization
 
+[Final Project Video (UW only)](https://drive.google.com/file/d/1ZMfYE0iqNUl2pCkw7vngrKCrGNZ4F92l/view)
+
 ## Abstract
 
 In this project, I propose to use a deep learning model to automatically generate summaries of text documents. The limitation of extractive summarization approach (e.g. TextRank) has prompted me to implement a GRU-based encoder-decoder model. Through experiments, I have chosen the best hyperparameters such as learning rate, batch size, teaching forcing ratio, momentum, and weight decay for the model and trained it for more than 1000 epochs. To evaluate the performance, I used ROUGE score (f1-measure, precision, and recall). I also conducted thorough analysis of the existing problem of the model and propose several plans to develop a high-quality text summarizer in the future.
