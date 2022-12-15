@@ -12,17 +12,19 @@ There are many different methods for summarizing text including extractive summa
 
 - Abstractive summarization, on the other hand, uses deep learning algorithms to understand the meaning and context of the text, and then generate a summary that is written in the model's own words. It is more challenging as it requires the model to have a deep understanding of the text and be able to generate new text that accurately captures the main ideas of the original. Some examples models such as recurrent neural networks (RNNs) and transformers have gained a lot of attention in recent years.
 
-In this project, I will explore many different approaches to summarize a given texts.
+In this project, I will explore different approaches to summarize a given texts.
 
 ## Related Work
 
-Today, there are still a lot of active works and researches on text summarization. Most of the work are focused on improving the state-of-the-art sequence-to-sequence (seq2seq) attention-based encoder-decoder architecture. How it works is summarized below:
+Today, there are still a lot of active works and researches on text summarization. Most of the state-of-the-art works are seq2seq encoder-decoder architecture. The major trend is on Transformer, followed by LSTM, and RNN. The major benchline are mostly on GigaWord datasets/corpuses, and state-of-the art BART-RXF transformer in 2020 has achieved the greatest ROUGE-1 score of 40.45.
+
+How a basic encoder-decoder architecture is summarized below:
 
 - The encoder processes the input text and encodes it into a compact representation, called the context vector. This vector captures the most important information from the input text, such as the overall meaning and the relationships between different words or phrases.
 
 - The decoder predicts the next word in the summary one at a time, based on the previous words in the summary and the context vector. It also uses an attention mechanism to focus on different parts of the input text at different times, allowing it to generate summaries that accurately capture the main ideas of the original text.
 
-In this project, I implemented and trained a basic encoder-decoder model, with some additional preprocessing and optimization steps to improve my model. I use a Kaggle dataset [News Summary](https://www.kaggle.com/datasets/sunnysai12345/news-summary), which contains more than 4500 published articles from February to August 2017, with annotated headlines. I choose this dataset as its article length is shorter, hence reduces the complexity of training and also decreases of the dataset. The other dataset that I tried first took a lot of unnecessary Colab time to just download/upload the dataset.
+In this project, I implemented and trained an encoder-decoder model, with some additional preprocessing and optimization steps to improve my model. I use a Kaggle dataset [News Summary](https://www.kaggle.com/datasets/sunnysai12345/news-summary), which contains more than 4500 published articles from February to August 2017, with annotated headlines. I choose this dataset as its article length is shorter, hence reduces the complexity of training and also decreases the size of dataset. Most of the other dataset that I tried initially took a lot of unnecessary Colab time to just download/upload the dataset of GBs in size.
 
 Take a peek at an example of the dataset:
 
@@ -50,13 +52,11 @@ Output (650 characters):
 
 > Envisioned as a three-year collaborative program, Intelligent Cloud Hub will support around 100 institutions with AI infrastructure, course content and curriculum, developer support, development tools and give students access to cloud and AI services. The company will provide AI development tools and Azure AI services such as Microsoft Cognitive Services, Bot Services and Azure Machine Learning. According to Manish Prakash, Country General Manager-PS, Health and Education, Microsoft India, said, "With AI being the defining technology of our time, it is transforming lives and industry and the jobs of tomorrow will require a different skillset.
 
-However, the limitation of extractive summarization makes it hard to condense an article into a short news headline.  Also, since it is an unsupervised learning algorithm, meaning that it does not use any labeled data or external knowledge to generate summaries. Instead, it relies on the structure of the text itself to identify important sentences and then produces a summary based on these sentences.
+However, the limitation of extractive summarization makes it hard to condense an article into a short news headline. Since it is an unsupervised learning algorithm, meaning that it does not use any labeled data or external knowledge to generate summaries. Instead, it relies on the structure of the text itself to identify important sentences and then produces a summary based on these sentences.
 
-One of the main limitations of TextRank is that it does not take into account the overall context or meaning of the text when generating summaries. This can lead to summaries that are incomplete or inaccurate, and do not accurately represent the original content. Additionally, TextRank is not able to incorporate any additional information or background knowledge that may be relevant to the text, which can further limit its ability to produce high-quality summaries.
+It also does not take into account the overall context or meaning of the text when generating summaries. This can lead to summaries that are incomplete or inaccurate, and do not accurately represent the original content. Additionally, TextRank is not able to incorporate any additional information or background knowledge that may be relevant to the text, which can further limit its ability to produce high-quality summaries.
 
-It is more useful to create a shorter paragraph that summarize a long article.
-
-Hence, I start to build an encoder-decoder model in Pytorch.
+TextRank is still a useful algorithm to create shorter paragraphs or extract keywords from a long article, but it is definitely not enough to be a good summarizer. Hence, I start to build an encoder-decoder model in Pytorch.
 
 ### Encoder-Decoder (GRU)
 
@@ -102,7 +102,7 @@ AttnDecoderRNN(
 
 According to my research, most of the related work prefer using LSTM/Bi-LSTM in text summarizer. However, my LSTM code does have some dimensionality error that took me two days of debugging, and with no good result. Hence, I decide to stick with just basic GRU first.
 
-**Worth mention**
+**Others**
 
 I also use `F.softmax`, `nn.Linear`, `F.relu`, and `dropout = 0.1` are pretty standard.
 
@@ -145,7 +145,7 @@ I choose a batch size of 256 and train the model at learning rate = 0.02 for 120
 This is the plot of the loss function across 1320 epochs.
 ![Plots of loss function](loss.png)
 
-The Final Rouge score (n-gram) averaged over 1000 random samples:
+The Final Rouge1 score (unigram) averaged over 1000 random samples:
 
 ```
 Precision: 0.294
@@ -155,7 +155,7 @@ f1_score: 0.287
 
 Apparently, all evaluation methods that I try is showing that the final model is not doing that well.
 
-The final loss is pretty high, the Rouge score is pretty low below the standard summarizer. Most importantly, the summary generated by the model is still unreadable, and often contains repeated/garbage words. It is still VERY VERY far from being a powerful summarizer like what a recent Hugging Face models or Chat-GPT can do.
+The final loss is pretty high, the Rouge score is pretty low below what a standard summarizer. Most importantly, the summary generated by the model is still unreadable, and often contains repeated/garbage words. It is still VERY VERY far from being a powerful summarizer like what a recent Hugging Face models or Chat-GPT can do.
 
 ## Conclusion
 
