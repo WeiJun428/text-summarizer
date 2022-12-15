@@ -1,4 +1,6 @@
-# CSE 490G1 Final Project: Text Summarization
+---
+title: CSE 490G1 Final Project: Text Summarization
+---
 
 ## Abstract
 
@@ -108,7 +110,7 @@ I also use `F.softmax`, `nn.Linear`, `F.relu`, and `dropout = 0.1` are pretty st
 
 #### Experiments and Hyperparamters
 
-Most of my experiment is conducted by training the model for 60 epochs, which took about 30 minutes each. If there is a tie (final loss is similar), I will stick with the one that follows the industrial standard or reduces the training time.
+Most of my experiment is conducted by training the model for 60 epochs, which took about 30 minutes each. If there is a tie (final loss is similar), I will stick with the one that follows the industrial standard or reduces the training time. I decide not to look at other evaluation method like ROUGE score as there are no difference in them between models trained only for 60 epochs.
 
 **Hidden Size**
 
