@@ -1,6 +1,4 @@
----
-title: CSE 490G1 Final Project: Text Summarization
----
+# CSE 490G1 Final Project: Text Summarization
 
 ## Abstract
 
